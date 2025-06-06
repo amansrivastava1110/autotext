@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #ffffff;
+      color: #333;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 328px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 16px 0;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      text-align: center;
+      word-wrap: break-word;
+    }
+
+    .status.has-selection {
+      background: #e6f7ff;
+      color: #0066cc;
+    }
+
+    .api-key-section {
+      margin-bottom: 20px;
+      /* Initially hide the section */
+      display: none;
+    }
+
+    .api-key-label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #444;
+    }
+
+    .api-key-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: border-color 0.2s;
+    }
+
+    .api-key-input:focus {
+      outline: none;
+      border-color: #18a0fb;
+    }
+
+    .tone-section {
+      margin-bottom: 20px;
+    }
+
+    .tone-label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #444;
+    }
+
+    .tone-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tone-btn {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tone-btn:hover {
+      background: #f5f5f5;
+      border-color: #999;
+    }
+
+    .tone-btn.active {
+      background: #18a0fb;
+      color: white;
+      border-color: #18a0fb;
+    }
+
+    .enhance-btn {
+      width: 100%;
+      padding: 12px;
+      background: #18a0fb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 20px;
+    }
+
+    .enhance-btn:hover:not(:disabled) {
+      background: #0d8df1;
+    }
+
+    .enhance-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .results-section {
+      display: none;
+    }
+
+    .results-label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #444;
+    }
+
+    .variation {
+      background: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .variation-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #333;
+      margin-right: 60px;
+      word-wrap: break-word;
+    }
+
+    .apply-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 6px 12px;
+      background: #18a0fb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .apply-btn:hover {
+      background: #0d8df1;
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 10px;
+      background: #fff;
+      color: #666;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 16px;
+    }
+
+    .reset-btn:hover {
+      background: #f5f5f5;
+      border-color: #999;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .loading-spinner {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #18a0fb;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      display: none;
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c00;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .save-key-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Style for the menu container */
+    .menu-container {
+      position: relative;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px; /* Adjust spacing as needed */
+    }
+
+    /* Style for the three-dot button */
+    .menu-button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 5px;
+      color: #666;
+    }
+
+    .menu-button:hover {
+      color: #333;
+    }
+
+    /* Style for the dropdown menu */
+    .dropdown-menu {
+      position: absolute;
+      top: 25px; /* Position below the button */
+      right: 0;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      list-style: none;
+      margin: 0;
+      padding: 5px 0;
+      z-index: 10;
+      display: none; /* Initially hidden */
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-menu li {
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .dropdown-menu li:hover {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💬 AutoText</h1>
+    
+    <div class="status" id="status">Select text in Figma to enhance it</div>
+    
+    <!-- Menu container -->
+    <div class="menu-container">
+      <button class="menu-button" id="menuButton">...</button>
+      <ul class="dropdown-menu" id="dropdownMenu">
+        <li id="removeApiKey">Remove API Key</li>
+      </ul>
+    </div>
+    
+    <div class="api-key-section">
+      <div class="api-key-label">OpenAI API Key</div>
+      <div class="input-group">
+        <input 
+          type="password" 
+          class="api-key-input" 
+          id="apiKey" 
+          placeholder="sk-..."
+          autocomplete="off"
+        />
+        <div class="save-key-container">
+          <input type="checkbox" id="saveApiKey" checked>
+          <label for="saveApiKey">Save API Key</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="tone-section">
+      <div class="tone-label">Select tone</div>
+      <div class="tone-buttons">
+        <button class="tone-btn" data-tone="casual">😄 Casual</button>
+        <button class="tone-btn" data-tone="formal">💼 Formal</button>
+        <button class="tone-btn" data-tone="friendly">👋🏻 Friendly</button>
+        <button class="tone-btn" data-tone="humorous">😆 Humorous</button>
+        <button class="tone-btn" data-tone="surprise">🎲 Surprise me</button>
+      </div>
+    </div>
+
+    <button class="enhance-btn" id="enhanceBtn" disabled>Enhance Copy</button>
+
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <div>Enhancing your copy...</div>
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <div class="results-section" id="results">
+      <div class="results-label">Enhanced variations</div>
+      <div id="variations"></div>
+      <button class="reset-btn" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    // State variables
+    let selectedText = '';
+    let selectedTone = '';
+    let hasTextSelected = false;
+    let savedApiKey = '';
+
+    // Get elements
+    const apiKeyInput = document.getElementById('apiKey');
+    const saveApiKeyCheckbox = document.getElementById('saveApiKey');
+    const enhanceBtn = document.getElementById('enhanceBtn');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const results = document.getElementById('results');
+    const status = document.getElementById('status');
+    const variationsDiv = document.getElementById('variations');
+    const resetBtn = document.getElementById('resetBtn');
+    const menuButton = document.getElementById('menuButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const removeApiKeyOption = document.getElementById('removeApiKey');
+    const apiKeySection = document.querySelector('.api-key-section');
+
+    // Function to save API key
+    function saveApiKey(apiKey) {
+      try {
+        if (apiKey && saveApiKeyCheckbox.checked) {
+          parent.postMessage({ 
+            pluginMessage: { 
+              type: 'saveApiKey',
+              apiKey: apiKey 
+            }
+          }, '*');
+          apiKeySection.style.display = 'none'; // Hide after saving
+          menuButton.style.display = 'block'; // Show menu button
+          console.log('[DEBUG] Sent API key to plugin for saving, hiding section');
+          return true;
+        } else {
+          parent.postMessage({ 
+            pluginMessage: { 
+              type: 'saveApiKey',
+              apiKey: null 
+            }
+          }, '*');
+          apiKeySection.style.display = 'block'; // Show after clearing
+          apiKeyInput.value = ''; // Clear input field
+          saveApiKeyCheckbox.checked = false; // Uncheck box
+          menuButton.style.display = 'none'; // Hide menu button
+          console.log('[DEBUG] Sent request to clear API key, showing section');
+          return true;
+        }
+      } catch (err) {
+        console.log('[DEBUG] Error sending save API key message:', err);
+        return false;
+      }
+    }
+
+    // Function to load API key
+    function loadApiKey() {
+      try {
+        parent.postMessage({ 
+          pluginMessage: { 
+            type: 'loadApiKey'
+          }
+        }, '*');
+        console.log('[DEBUG] Sent request to load API key');
+        return true;
+      } catch (err) {
+        console.log('[DEBUG] Error sending load API key message:', err);
+        return false;
+      }
+    }
+
+    // Load saved API key on startup
+    loadApiKey();
+
+    // Handle API key input
+    apiKeyInput.addEventListener('input', (e) => {
+      const apiKey = e.target.value.trim();
+      savedApiKey = apiKey;
+      saveApiKey(apiKey);
+      updateEnhanceButton();
+    });
+
+    // Handle save API key checkbox
+    saveApiKeyCheckbox.addEventListener('change', (e) => {
+      const apiKey = apiKeyInput.value.trim();
+      saveApiKey(apiKey);
+    });
+
+    // Toggle dropdown menu visibility
+    menuButton.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('show');
+    });
+
+    // Handle remove API key click
+    removeApiKeyOption.addEventListener('click', () => {
+      saveApiKey(''); // Clear the API key
+      dropdownMenu.classList.remove('show'); // Hide the menu
+    });
+
+    // Hide dropdown menu when clicking outside
+    window.addEventListener('click', (event) => {
+      if (!event.target.matches('#menuButton') && !dropdownMenu.contains(event.target)) {
+        dropdownMenu.classList.remove('show');
+      }
+    });
+
+    // Listen for messages from the plugin code
+    window.onmessage = (event) => {
+      // Make sure the message is from our plugin
+      if (!event.data || !event.data.pluginMessage) {
+        return;
+      }
+      
+      const msg = event.data.pluginMessage;
+      console.log('[UI] Received message:', msg.type, msg);
+      
+      if (msg.type === 'selectionChanged') {
+        handleSelectionChange(msg);
+      } else if (msg.type === 'textUpdated') {
+        handleTextUpdated(msg);
+      } else if (msg.type === 'apiKeyLoaded') {
+        const apiKeySection = document.querySelector('.api-key-section');
+        if (msg.apiKey) {
+          apiKeyInput.value = msg.apiKey;
+          saveApiKeyCheckbox.checked = true;
+          apiKeySection.style.display = 'none'; // Hide if key is loaded
+          menuButton.style.display = 'block'; // Show menu button
+          console.log('[DEBUG] Received and set saved API key, hiding section');
+        } else {
+          apiKeySection.style.display = 'block'; // Show if no key is loaded
+          menuButton.style.display = 'none'; // Hide menu button
+          console.log('[DEBUG] No saved API key found, showing section');
+        }
+      } else if (msg.type === 'pong') {
+        console.log('[UI] Communication verified - received pong');
+      }
+    };
+
+    // Handle selection changes
+    function handleSelectionChange(msg) {
+      console.log('[UI] Handling selection change:', msg);
+      
+      const status = document.getElementById('status');
+      selectedText = msg.text || '';
+      hasTextSelected = msg.hasSelection || false;
+      
+      if (hasTextSelected && selectedText) {
+        const displayText = selectedText.length > 50 
+          ? selectedText.substring(0, 50) + '...' 
+          : selectedText;
+        status.textContent = `Selected: "${displayText}"`;
+        status.classList.add('has-selection');
+        console.log('[UI] Updated status with text:', displayText);
+      } else {
+        status.textContent = 'Select text in Figma to enhance it';
+        status.classList.remove('has-selection');
+        console.log('[UI] Reset status - no text selected');
+      }
+      
+      updateEnhanceButton();
+    }
+
+    // Handle text update confirmation
+    function handleTextUpdated(msg) {
+      if (msg.success) {
+        showSuccess();
+      } else {
+        showError(msg.error || 'Failed to update text');
+      }
+    }
+
+    // Update enhance button state
+    function updateEnhanceButton() {
+      const enhanceBtn = document.getElementById('enhanceBtn');
+      const apiKey = document.getElementById('apiKey').value.trim();
+      
+      const canEnhance = hasTextSelected && selectedTone && apiKey;
+      enhanceBtn.disabled = !canEnhance;
+      
+      console.log('[UI] Button state updated - Can enhance:', canEnhance);
+    }
+
+    // Show success message
+    function showSuccess() {
+      const status = document.getElementById('status');
+      const originalText = status.textContent;
+      const originalClass = status.className;
+      
+      status.textContent = 'Text updated successfully! 🎉';
+      status.style.background = '#d4edda';
+      status.style.color = '#155724';
+      
+      setTimeout(() => {
+        status.textContent = originalText;
+        status.style.background = '';
+        status.style.color = '';
+        status.className = originalClass;
+      }, 2000);
+    }
+
+    // Show error message
+    function showError(message) {
+      const error = document.getElementById('error');
+      error.textContent = message;
+      error.style.display = 'block';
+      
+      setTimeout(() => {
+        error.style.display = 'none';
+      }, 5000);
+    }
+
+    // Handle tone selection
+    document.querySelectorAll('.tone-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedTone = btn.dataset.tone;
+        console.log('[UI] Tone selected:', selectedTone);
+        updateEnhanceButton();
+      });
+    });
+
+    // Handle enhance button click
+    document.getElementById('enhanceBtn').addEventListener('click', async () => {
+      const apiKey = document.getElementById('apiKey').value.trim();
+      
+      if (!selectedText || !selectedTone || !apiKey) {
+        console.log('[UI] Cannot enhance - missing requirements');
+        return;
+      }
+
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const results = document.getElementById('results');
+      
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      results.style.display = 'none';
+
+      try {
+        const toneMap = {
+          casual: 'casual',
+          formal: 'formal',
+          friendly: 'friendly balance between formal and helpful',
+          humorous: 'a mix of friendly with a touch of humour',
+          surprise: 'the best suited format according to your intelligence'
+        };
+
+        const prompt = `You're a world renowned UX copywriter. Enhance the copy below in the specified tone and generate 3 variations separated by a new line
+
+Copy: ${selectedText}
+
+Tone: ${toneMap[selectedTone]}
+
+Please provide exactly 3 variations, each on a new line, without numbering or bullet points.`;
+
+        console.log('[UI] Calling OpenAI API...');
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 500
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || 'Failed to enhance copy. Please check your API key.');
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content.trim();
+        const variations = content.split('\n')
+          .map(v => v.trim())
+          .filter(v => v.length > 0)
+          .slice(0, 3);
+        
+        console.log('[UI] Received variations:', variations.length);
+        displayVariations(variations);
+        
+      } catch (err) {
+        console.error('[UI] Enhancement error:', err);
+        showError(err.message || 'An error occurred. Please try again.');
+      } finally {
+        loading.style.display = 'none';
+      }
+    });
+
+    // Display variations
+    function displayVariations(variations) {
+      const variationsContainer = document.getElementById('variations');
+      const results = document.getElementById('results');
+      
+      variationsContainer.innerHTML = '';
+      
+      variations.forEach((variation, index) => {
+        const variationDiv = document.createElement('div');
+        variationDiv.className = 'variation';
+        
+        const textDiv = document.createElement('div');
+        textDiv.className = 'variation-text';
+        textDiv.textContent = variation
+          .replace(/^\d+[\.\)]\s*/, '')
+          .replace(/^[-•]\s*/, '')
+          .trim();
+        
+        const applyBtn = document.createElement('button');
+        applyBtn.className = 'apply-btn';
+        applyBtn.textContent = 'Apply';
+        applyBtn.onclick = () => applyVariation(textDiv.textContent);
+        
+        variationDiv.appendChild(textDiv);
+        variationDiv.appendChild(applyBtn);
+        variationsContainer.appendChild(variationDiv);
+      });
+      
+      results.style.display = 'block';
+    }
+
+    // Apply variation
+    function applyVariation(text) {
+      console.log('[UI] Applying text:', text.substring(0, 30) + '...');
+      parent.postMessage({
+        pluginMessage: {
+          type: 'applyText',
+          text: text
+        }
+      }, '*');
+    }
+
+    // Handle reset button
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('variations').innerHTML = '';
+      document.getElementById('error').style.display = 'none';
+      document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+      selectedTone = '';
+      updateEnhanceButton();
+    });
+
+    // Request initial selection when UI loads
+    console.log('[UI] Plugin UI loaded');
+    setTimeout(() => {
+      console.log('[UI] Requesting initial selection...');
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'requestSelection' 
+        } 
+      }, '*');
+      
+      // Send a ping to test communication
+      setTimeout(() => {
+        console.log('[UI] Sending ping to test communication...');
+        parent.postMessage({ 
+          pluginMessage: { 
+            type: 'ping' 
+          } 
+        }, '*');
+      }, 500);
+    }, 100);
+  </script>
+</body>
+</html>
