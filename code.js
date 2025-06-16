@@ -4,7 +4,7 @@
 figma.showUI(__html__, { 
   width: 360, 
   height: 600,
-  title: "AutoText - Enhance UX Copy"
+  title: "AutoText — AI copy writer"
 });
 
 // Variable to store the currently selected text node
