@@ -558,7 +558,7 @@
       const originalText = status.textContent;
       const originalClass = status.className;
       
-      status.textContent = 'Text updated successfully! 💕';
+      status.textContent = 'Text updated successfully!';
       status.style.background = '#d4edda';
       status.style.color = '#155724';
       
@@ -676,6 +676,11 @@
           applyBtn.classList.add('applied');
           applyBtn.textContent = 'Applied';
           applyBtn.disabled = true;
+          setTimeout(() => {
+            applyBtn.classList.remove('applied');
+            applyBtn.textContent = 'Apply';
+            applyBtn.disabled = false;
+          }, 60000);
         });
         
         variationDiv.appendChild(textDiv);
